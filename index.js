@@ -39,6 +39,4 @@ app.post('/tag', (req,res) => {
     res.send({res: "Inserted"});
 });
 
-app.listen(4000, () => {
-    console.log("Rodando na porta 400");
-});
+app.listen(process.env.PORT || 4000);
