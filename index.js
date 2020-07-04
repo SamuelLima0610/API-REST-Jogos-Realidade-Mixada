@@ -1,17 +1,21 @@
 const express = require('express');
 const app = express();
-const cors = require('cors');
-const bodyParser = require('body-parser');
+const consign = require('consign');
+const db = require('./database/config');
 
-const tagRoutes = require('./routes/TagRoutes');
+app.db = db;
 
-app.use(cors());
-app.use(bodyParser.urlencoded({extended: false}));
-app.use(bodyParser.json());
+consign()
+    .then('./config/bodyAndCors.js')
+    .then('./api/validation.js')
+    .then('./api/methods.js')
+    .then('./api')
+    .then('./config/multer.js')
+    .then('./config/routes.js')
+    .into(app);
 
-app.use('/',tagRoutes);
 
 app.listen(process.env.PORT || 4000);
-// app.listen(4000,() => {
-//     console.log('Rodando porta 4000');
-// });
+/*app.listen(4000,() => {
+    console.log('Rodando porta 4000');
+});*/

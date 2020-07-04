@@ -1,7 +1,6 @@
 const firebase = require('firebase');
 
 // Set the configuration for your app
-// TODO: Replace with your project's config object
 var config = {
     apiKey: "AIzaSyDyuMec3UDlvasq1VQZw1Fbwa-cBd5OpGs",
     authDomain: "trimemoria.firebaseapp.com",
