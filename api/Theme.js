@@ -1,6 +1,8 @@
 module.exports = app => {
+
     const {writeThemeData,find} = app.api.methods;
     const {existsOrError} = app.api.validation;
+    const {getImagesTheme} = app.api.Image;
 
     var themes = [];
     //references of themes in the firebase
@@ -12,7 +14,40 @@ module.exports = app => {
     });
 
     const get = (req,res) => {
-        res.json(themes);
+        let HATEOAS = [
+            {
+                href:"https://rest-api-trimemoria.herokuapp.com/theme",
+                method: "POST",
+                rel: "post_theme"
+            }
+        ]
+        res.json({data: themes,_links: HATEOAS});
+    }
+
+    const getImages = async (req,res) => {
+        let theme = req.params.theme
+        let HATEOAS = [
+            {
+                href:"https://rest-api-trimemoria.herokuapp.com/theme",
+                method: "GET",
+                rel: "get_theme"
+            }
+        ]
+        try{
+            let answer = await getImagesTheme(theme);
+            existsOrError("Não existe imagens armazenadas neste tema, com esse nome",answer);
+            let images = answer.map(data => {
+                let cel = {
+                    href: 'https://rest-api-trimemoria.herokuapp.com/image/'+ data.id,
+                    group: data.group
+                };
+                return cel;
+            });
+            res.json({data: images,_links: HATEOAS});
+        }catch(message){
+            res.statusCode = 404;
+            res.json({error: message});
+        }
     }
 
     const getById = async (req,res) => {
@@ -21,7 +56,19 @@ module.exports = app => {
             try{
                 let answer = await find(manager,id,'id');
                 existsOrError("Não foi encontrado o tema",answer);
-                res.json(answer);
+                let HATEOAS = [
+                    {
+                        href:"https://rest-api-trimemoria.herokuapp.com/theme/" + answer[0].key,
+                        method: "DELETE",
+                        rel: "delete_theme"
+                    },
+                    {
+                        href:"https://rest-api-trimemoria.herokuapp.com/theme/"  + answer[0].key,
+                        method: "PUT",
+                        rel: "put_theme"
+                    }
+                ]
+                res.json({data: answer[0], _links: HATEOAS});
             }catch(message){
                 res.statusCode = 404;
                 res.json({error: message});
@@ -30,8 +77,15 @@ module.exports = app => {
     }
 
     const destroy = (req,res) => {
+        let HATEOAS = [
+            {
+                href:"https://rest-api-trimemoria.herokuapp.com/theme",
+                method: "GET",
+                rel: "get_theme"
+            }
+        ]
         let key = req.params.key;
-        app.db.ref("themes/" + key).remove().then(() =>  res.sendStatus(200))
+        app.db.ref("themes/" + key).remove().then(() =>  res.json({data: "Excluido com sucesso", _links: HATEOAS}))
                                             .catch(error => res.status(404).send({error}));
     }
 
@@ -40,6 +94,13 @@ module.exports = app => {
         try{
             existsOrError("O campo nome deve ser preenchido",name);
             existsOrError("O campo quantidade deve ser preenchido",qntd);
+            let HATEOAS = [
+                {
+                    href:"https://rest-api-trimemoria.herokuapp.com/theme",
+                    method: "GET",
+                    rel: "get_theme"
+                }
+            ]
             if(req.params.key){
                 app.db.ref("themes/" + req.params.key).set({
                     id, 
@@ -47,12 +108,12 @@ module.exports = app => {
                     qntd
                 });
                 res.statusCode = 200;
-                res.send({res: "Updated"});
+                res.send({data: "Updated",_links: HATEOAS});
             }else{
                 let randomNumber = Math.floor(Math.random() * 65536);
                 writeThemeData(randomNumber, name, qntd, manager);
                 res.statusCode = 200;
-                res.send({res: "Inserted"});
+                res.send({data: "Inserted",_links: HATEOAS});
             }
         }catch(message){
             res.statusCode = 404;
@@ -60,5 +121,5 @@ module.exports = app => {
         }
     }
 
-    return {get, getById, destroy, save};
+    return {get, getById, destroy, save, getImages};
 }

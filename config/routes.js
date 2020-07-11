@@ -11,6 +11,7 @@ module.exports = app => {
     app.post('/theme',app.api.Theme.save);
     app.put('/theme/:key',app.api.Theme.save);
     app.delete('/theme/:key',app.api.Theme.destroy);
+    app.get('/theme/image/:theme', app.api.Theme.getImages);
 
     //ImageThemes
     app.get('/image', app.api.Image.get);

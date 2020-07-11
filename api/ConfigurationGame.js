@@ -12,27 +12,53 @@ module.exports = app => {
     });
 
     const get = (req,res) => {
-        res.json(configurationsGame);
+        let HATEOAS = [
+            {
+                href:"https://rest-api-trimemoria.herokuapp.com/configGame",
+                method: "POST",
+                rel: "post_config_game"
+            }
+        ]
+        res.json({data:configurationsGame, _links: HATEOAS});
     }
 
     const destroy = (req,res) => {
+        let HATEOAS = [
+            {
+                href:"https://rest-api-trimemoria.herokuapp.com/configGame",
+                method: "GET",
+                rel: "get_config_game"
+            }
+        ]
         let key = req.params.key;
         app.db.ref("configuration/" + key).remove()
-                                          .then(() => res.sendStatus(200))
-                                          .catch(error => res.status(404).send({error})); 
+                                          .then(() => res.json({data: "Excluido com sucesso", _links: HATEOAS}))
+                                          .catch(error => res.status(404).send({error,_links:HATEOAS})); 
     }
 
     const getById = async (req,res) => {
         let id = req.params.id;
         if(!isNaN(id)){
+            let answer = await find(manager,id,'id');
             try{
-                let answer = await find(manager,id,'id');
                 existsOrError("Não existe configuração com esse id",answer);
             }catch(message){
                 res.statusCode = 404;
                 res.json({error: message});
             }
-            res.json(answer);
+            let HATEOAS = [
+                {
+                    href:"https://rest-api-trimemoria.herokuapp.com/configGame/" + answer[0].key,
+                    method: "DELETE",
+                    rel: "delete_config_game"
+                },
+                {
+                    href:"https://rest-api-trimemoria.herokuapp.com/configGame/"  + answer[0].key,
+                    method: "PUT",
+                    rel: "put_config_game"
+                }
+            ]
+            res.json({data: answer[0], _links: HATEOAS});
         }
     }
     
@@ -41,22 +67,28 @@ module.exports = app => {
         try{
             existsOrError("O campo nome deve ser preenchido",name);
             existsOrError("O campo das tags deve ser preenchido",configurationTag);
+            let HATEOAS = [
+                {
+                    href:"https://rest-api-trimemoria.herokuapp.com/configGame",
+                    method: "GET",
+                    rel: "get_config_game"
+                }
+            ]
+            res.statusCode = 200;
             if(req.params.key){
                 app.db.ref("configuration/" + req.params.key).set({
                     id, 
                     name, 
                     configurationTag
                 });
-                res.statusCode = 200;
-                res.send({res: "Updated"});
+                res.send({data: "Updated",_links: HATEOAS});
             }else{
                 let randomNumber = Math.floor(Math.random() * 65536);
                 writeConfigurationGameData(randomNumber,name,configurationTag,manager);
-                res.statusCode = 200;
-                res.send({res: "Inserted"});
+                res.send({data: "Inserted",_links: HATEOAS});
             }
         }catch(message){
-            res.status(404).send({error: message});
+            res.status(404).send({error: message,_links:HATEOAS});
         }
     }
 

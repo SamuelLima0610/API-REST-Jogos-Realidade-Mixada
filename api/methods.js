@@ -46,11 +46,13 @@ module.exports = app => {
 
     //function to look the cel of a specific
     async function find (manager, value, attribute){
-        let find = undefined;
+        let find = [];
         await manager.orderByValue().on("value", tags => {
             tags.forEach( data => {
                 if(data.val()[attribute] == value){
-                    find = data;
+                    //let json = {...data.val()}
+                    //console.log(json) 
+                    find.push({...data.val(),key: data.key});
                 }
             });
         }); 
