@@ -59,5 +59,15 @@ module.exports = app => {
         return find;
     }
 
-    return {writeTagData, writeThemeData, writeImageThemeData, writeConfigurationGameData, find}
+    async function data(manager){
+        var list = [];
+        await manager.once('value' , elements => {
+            elements.forEach(data => {
+                list.push({...data.val()})
+            })
+        })
+        return list
+    }
+
+    return {writeTagData, writeThemeData, writeImageThemeData, writeConfigurationGameData, find, data}
 }

@@ -1,19 +1,14 @@
 module.exports = app => {
 
-    const {writeThemeData,find} = app.api.methods;
+    const {writeThemeData,find, data} = app.api.methods;
     const {existsOrError} = app.api.validation;
     const {getImagesTheme} = app.api.Image;
 
-    var themes = [];
     //references of themes in the firebase
     var manager = app.db.ref('themes');
 
-    //take the theme data
-    manager.on('value', (data) => {
-        themes = data;
-    });
 
-    const get = (req,res) => {
+    const get = async (req,res) => {
         let HATEOAS = [
             {
                 href:"https://rest-api-trimemoria.herokuapp.com/theme",
@@ -21,6 +16,7 @@ module.exports = app => {
                 rel: "post_theme"
             }
         ]
+        let themes = await data(manager)
         res.json({data: themes,_links: HATEOAS});
     }
 
