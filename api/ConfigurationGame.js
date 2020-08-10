@@ -1,17 +1,11 @@
 module.exports = app => {
-    const {writeConfigurationGameData,find} = app.api.methods;
+    const {writeConfigurationGameData,find,data} = app.api.methods;
     const {existsOrError} = app.api.validation;
 
-    var configurationsGame = [];
     //references of themes in the firebase
     var manager = app.db.ref('configuration');
     
-    //take the config data
-    manager.on('value', (data) => {
-        configurationsGame = data;
-    });
-
-    const get = (req,res) => {
+    const get = async (req,res) => {
         let HATEOAS = [
             {
                 href:"https://rest-api-trimemoria.herokuapp.com/configGame",
@@ -19,6 +13,7 @@ module.exports = app => {
                 rel: "post_config_game"
             }
         ]
+        let configurationsGame = await data(manager)
         res.json({data:configurationsGame, _links: HATEOAS});
     }
 
