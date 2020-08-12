@@ -58,7 +58,7 @@ module.exports = app => {
     }
     
     const save = (req,res) => {
-        let {name,configurationTag,id} = req.body;
+        let {name,configurationTag,id,qntd} = req.body;
         try{
             existsOrError("O campo nome deve ser preenchido",name);
             existsOrError("O campo das tags deve ser preenchido",configurationTag);
@@ -74,12 +74,13 @@ module.exports = app => {
                 app.db.ref("configuration/" + req.params.key).set({
                     id, 
                     name, 
+                    qntd,
                     configurationTag
                 });
                 res.send({data: "Updated",_links: HATEOAS});
             }else{
                 let randomNumber = Math.floor(Math.random() * 65536);
-                writeConfigurationGameData(randomNumber,name,configurationTag,manager);
+                writeConfigurationGameData(randomNumber,name,configurationTag,qntd,manager);
                 res.send({data: "Inserted",_links: HATEOAS});
             }
         }catch(message){

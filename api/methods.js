@@ -33,12 +33,13 @@ module.exports = app => {
     }
 
     //function to create a new information
-    function writeConfigurationGameData(id, name, configurationTag, manager) {
+    function writeConfigurationGameData(id, name, configurationTag, qntd,manager) {
         // Generate a reference to a new location and add some data using push()
         let configurationRef = manager.push();
         configurationRef.set({
             id,
             name,
+            qntd,
             configurationTag
         });
     }
@@ -47,10 +48,10 @@ module.exports = app => {
     //function to look the cel of a specific
     async function find (manager, value, attribute){
         let find = [];
-        await manager.orderByValue().on("value", tags => {
+        await manager.orderByValue().once("value", tags => {
             tags.forEach( data => {
                 if(data.val()[attribute] == value){
-                    //let json = {...data.val()}
+                    let json = {...data.val()}
                     //console.log(json) 
                     find.push({...data.val(),key: data.key});
                 }
