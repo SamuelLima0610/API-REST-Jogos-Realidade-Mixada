@@ -13,10 +13,8 @@ module.exports = app => {
                   //if don't exists, create a new directory
                   fs.mkdir(destination, (err) => {
                       if (err) {
-                          console.log("Deu ruim...");
                           return
                       }
-                      console.log("Diretório criado! =)")
                   });
                 }
                 cb(null,destination);

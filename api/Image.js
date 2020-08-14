@@ -2,25 +2,18 @@ const fs = require('fs');
 
 module.exports = app => {
 
-    const {writeImageThemeData,find} = app.api.methods;
+    const {writeImageThemeData,find, data} = app.api.methods;
     const {existsOrError} = app.api.validation;
-
-    var images = [];
 
     //references of themes in the firebase
     var manager = app.db.ref('imageTheme');
-
-    //take the theme data
-    manager.on('value', (data) => {
-        images = data;
-    });
 
     const getImagesTheme = async (name) => {
         let answer = await find(manager,name,'theme');
         return answer;
     }
 
-    const get = (req,res) => {
+    const get = async (req,res) => {
         let HATEOAS = [
             {
                 href:"https://rest-api-trimemoria.herokuapp.com/image",
@@ -28,6 +21,7 @@ module.exports = app => {
                 rel: "post_image"
             }
         ]
+        let images = await data(manager)
         res.json({data: images, _links: HATEOAS});
     }
 
