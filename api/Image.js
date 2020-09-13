@@ -37,7 +37,7 @@ module.exports = app => {
         try{
             let answer = await find(manager,id,'id');
             existsOrError("Imagem não encontrada",answer[0]);
-            fs.unlink(`./${answer[0].path}`, (err) => {
+            /*fs.unlink(`./${answer[0].path}`, (err) => {
                 if (err) {
                     console.log("failed to delete local image:"+err);
                 } else {
@@ -45,9 +45,11 @@ module.exports = app => {
                                           .then(() => res.json({data: "Excluido com sucesso", _links: HATEOAS}))
                                           .catch(error => res.status(404).send({error,_links:HATEOAS}));                               
                 }
-            });
+            });*/
+            app.db.ref("imageTheme/" + key).remove()
+                                          .then(() => res.json({data: "Excluido com sucesso", _links: HATEOAS}))
+                                          .catch(error => res.status(404).send({error,_links:HATEOAS}));
         }catch(message){
-            console.log('catch')
             res.status(404).send({error: message});
         }
     }
@@ -58,8 +60,19 @@ module.exports = app => {
             try{
                 let answer = await find(manager,id,'id');
                 existsOrError("Imagem não encontrada",answer);
-                //res.status(200).send(answer[0].path)
-                res.status(200).sendFile(process.cwd() + answer[0].path);
+                let HATEOAS = [
+                    {
+                        href:"https://rest-api-trimemoria.herokuapp.com/image/" + answer[0].key,
+                        method: "DELETE",
+                        rel: "delete_config_game"
+                    },
+                    {
+                        href:"https://rest-api-trimemoria.herokuapp.com/image/"  + answer[0].key,
+                        method: "PUT",
+                        rel: "put_config_game"
+                    }
+                ]
+                res.json({data: answer[0], _links: HATEOAS});
             }catch(message){
                 res.statusCode = 404;
                 res.json({error: message});
@@ -67,8 +80,8 @@ module.exports = app => {
         }
     }
 
-    const save = (req,res) => {
-        let {theme,group,id,path,number,extension} = req.body;
+    const save = async (req,res) => {
+        let {theme,group,id,path,url} = req.body;
         try{
             existsOrError("O campo tema deve ser preenchido",theme);
             existsOrError("O campo grupo deve ser preenchido",group);
@@ -79,26 +92,32 @@ module.exports = app => {
                     rel: "get_image"
                 }
             ]
+            let exists = await find(manager,path,'path');
             if(req.params.key){
                 existsOrError("O campo diretório deve ser preenchido",path);
-                app.db.ref("imageTheme/" + req.params.key).set({
-                    id, 
-                    theme, 
-                    group, 
-                    path
-                });
-                res.statusCode = 200;
-                res.send({data: "Updated", _links: HATEOAS});
+                let answer = await find(manager,id,'id');
+                if(path != answer[0].path && exists.length > 0){
+                    res.status(404).send({error: "Já existe um imagema cadastrada com esse nome no tema",_links:HATEOAS});
+                }else{
+                    app.db.ref("imageTheme/" + req.params.key).set({
+                        id, 
+                        theme, 
+                        group, 
+                        path,
+                        url
+                    });
+                    res.statusCode = 200;
+                    res.send({data: "Updated", _links: HATEOAS});
+                }
             }else{
-                if(req.file){
+                if(exists.length > 0){
+                    res.status(404).send({error: "Já existe um imagema cadastrada com esse nome no tema",_links:HATEOAS});
+                }else{
                     let randomNumber = Math.floor(Math.random() * 65536);
-                    let newPath = `/public/img/${theme}/${theme}(${number})${extension}`;
-                    writeImageThemeData(randomNumber, theme, group, newPath, manager);
+                    //let newPath = `/public/img/${theme}/${theme}(${number})${extension}`;
+                    writeImageThemeData(randomNumber, theme, group, path, url,manager);
                     res.statusCode = 200;
                     res.send({data: "Inserted",_links: HATEOAS});
-                }else{
-                    res.statusCode = 404;
-                    res.json({error: "Não aceita esse formato de arquivo"});
                 }
             }
         }catch(message){

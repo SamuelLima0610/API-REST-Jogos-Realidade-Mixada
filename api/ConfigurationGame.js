@@ -57,7 +57,7 @@ module.exports = app => {
         }
     }
     
-    const save = (req,res) => {
+    const save = async (req,res) => {
         let {name,configurationTag,id,qntd} = req.body;
         try{
             existsOrError("O campo nome deve ser preenchido",name);
@@ -69,19 +69,30 @@ module.exports = app => {
                     rel: "get_config_game"
                 }
             ]
-            res.statusCode = 200;
+            let exists = await find(manager,name,'name');
             if(req.params.key){
-                app.db.ref("configuration/" + req.params.key).set({
-                    id, 
-                    name, 
-                    qntd,
-                    configurationTag
-                });
-                res.send({data: "Updated",_links: HATEOAS});
+                let answer = await find(manager,id,'id');
+                if(name != answer[0].name && exists.length > 0){
+                    res.status(404).send({error: "Já existe um cadastro com esse nome",_links:HATEOAS});
+                }else{
+                    app.db.ref("configuration/" + req.params.key).set({
+                        id, 
+                        name, 
+                        qntd,
+                        configurationTag
+                    });
+                    res.statusCode = 200;
+                    res.send({data: "Updated",_links: HATEOAS});
+                }
             }else{
-                let randomNumber = Math.floor(Math.random() * 65536);
-                writeConfigurationGameData(randomNumber,name,configurationTag,qntd,manager);
-                res.send({data: "Inserted",_links: HATEOAS});
+                if(exists.length > 0){
+                    res.status(404).send({error: "Já existe um cadastro com esse nome",_links:HATEOAS});
+                }else{
+                    let randomNumber = Math.floor(Math.random() * 65536);
+                    writeConfigurationGameData(randomNumber,name,configurationTag,qntd,manager);
+                    res.statusCode = 200;
+                    res.send({data: "Inserted",_links: HATEOAS});
+                }
             }
         }catch(message){
             res.status(404).send({error: message,_links:HATEOAS});

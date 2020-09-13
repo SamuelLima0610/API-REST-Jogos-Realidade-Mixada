@@ -85,7 +85,7 @@ module.exports = app => {
                                             .catch(error => res.status(404).send({error}));
     }
 
-    const save = (req,res) => {
+    const save = async (req,res) => {
         let {name,qntd,id} = req.body;
         try{
             existsOrError("O campo nome deve ser preenchido",name);
@@ -97,19 +97,29 @@ module.exports = app => {
                     rel: "get_theme"
                 }
             ]
+            let exists = await find(manager,name,'name');
             if(req.params.key){
-                app.db.ref("themes/" + req.params.key).set({
-                    id, 
-                    name, 
-                    qntd
-                });
-                res.statusCode = 200;
-                res.send({data: "Updated",_links: HATEOAS});
+                let answer = await find(manager,id,'id');
+                if(name != answer[0].name && exists.length > 0){
+                    res.status(404).send({error: "Já existe um cadastro com esse nome",_links:HATEOAS});
+                }else{
+                    app.db.ref("themes/" + req.params.key).set({
+                        id, 
+                        name, 
+                        qntd
+                    });
+                    res.statusCode = 200;
+                    res.send({data: "Updated",_links: HATEOAS});
+                }
             }else{
-                let randomNumber = Math.floor(Math.random() * 65536);
-                writeThemeData(randomNumber, name, qntd, manager);
-                res.statusCode = 200;
-                res.send({data: "Inserted",_links: HATEOAS});
+                if(exists.length > 0){
+                    res.status(404).send({error: "Já existe um cadastro com esse nome",_links:HATEOAS});
+                }else{
+                    let randomNumber = Math.floor(Math.random() * 65536);
+                    writeThemeData(randomNumber, name, qntd, manager);
+                    res.statusCode = 200;
+                    res.send({data: "Inserted",_links: HATEOAS});
+                }
             }
         }catch(message){
             res.statusCode = 404;

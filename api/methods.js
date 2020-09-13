@@ -21,14 +21,15 @@ module.exports = app => {
     }
 
     //function to create a new information
-    function writeImageThemeData(id, theme, group, path, manager) {
+    function writeImageThemeData(id, theme, group, path, url, manager) {
         // Generate a reference to a new location and add some data using push()
         let imageThemesRef = manager.push();
         imageThemesRef.set({
             id,
             theme,
             group,
-            path
+            path,
+            url
         });
     }
 

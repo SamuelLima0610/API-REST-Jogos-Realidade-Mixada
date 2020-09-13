@@ -16,7 +16,7 @@ module.exports = app => {
     //ImageThemes
     app.get('/image', app.api.Image.get);
     app.get('/image/:id',app.api.Image.getById);
-    app.post('/image', app.config.multer.upload.single("file"), app.api.Image.save);
+    app.post('/image', app.api.Image.save);
     app.put('/image/:key',app.api.Image.save);
     app.delete('/image/:key/:id',app.api.Image.destroy);
 
