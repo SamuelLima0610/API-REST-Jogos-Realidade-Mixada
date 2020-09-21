@@ -34,7 +34,7 @@ module.exports = app => {
             existsOrError("Não existe imagens armazenadas neste tema, com esse nome",answer);
             let images = answer.map(data => {
                 let cel = {
-                    href: 'https://rest-api-trimemoria.herokuapp.com/image/'+ data.id,
+                    href: data.url,
                     group: data.group
                 };
                 return cel;
