@@ -1,16 +1,11 @@
-module.exports = app => {
-    const {writeTagData} = app.api.methods;
+module.exports = (app,io) => {
+    const {writeTagData,data} = app.api.methods;
 
-    var tagsDetected = [];
     var manager = app.db.ref('tags'); //references of tags in the firebase
     
-    //take the tag data
-    manager.on('value', (data) => {
-        tagsDetected = data;
-    });
-
-    const get = (req,res) => {
-        res.json(tagsDetected);    
+    const get = async (req,res) => {
+        let tags = await data(manager)
+        res.json(tags);    
     }
 
     const destroy = (req,res) => {
@@ -41,6 +36,7 @@ module.exports = app => {
 
     const save = (req,res) => {
         let tag = req.body.tag;
+        io.emit("tag",{tag})
         let randomNumber = Math.floor(Math.random() * 65536);
         writeTagData(randomNumber, tag, manager);
         res.statusCode = 200;

@@ -33,10 +33,8 @@ module.exports = app => {
                 rel: "get_image"
             }
         ]
-        let {key,id} = req.params;
+        let {key} = req.params;
         try{
-            let answer = await find(manager,id,'id');
-            existsOrError("Imagem não encontrada",answer[0]);
             /*fs.unlink(`./${answer[0].path}`, (err) => {
                 if (err) {
                     console.log("failed to delete local image:"+err);

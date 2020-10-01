@@ -18,7 +18,7 @@ module.exports = app => {
     app.get('/image/:id',app.api.Image.getById);
     app.post('/image', app.api.Image.save);
     app.put('/image/:key',app.api.Image.save);
-    app.delete('/image/:key/:id',app.api.Image.destroy);
+    app.delete('/image/:key',app.api.Image.destroy);
 
     //Configuration Game
     app.get('/configGame',app.api.ConfigurationGame.get);
