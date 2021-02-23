@@ -1,50 +1,17 @@
 module.exports = app => {
-    //function to create a new information
-    function writeTagData(id,tag,manager) {
-        // Generate a reference to a new location and add some data using push()
-        let tagsRef = manager.push();
-        tagsRef.set({
-            id,
-            tag
-        });
+
+    function getReferenceFirebase(category){
+        //references in the firebase
+        var manager = app.db.ref(category);
+        return manager;
     }
 
-    //function to create a new information
-    function writeThemeData(id, name, qntd, manager) {
-        // Generate a reference to a new location and add some data using push()
-        let themesRef = manager.push();
-        themesRef.set({
-            id,
-            name,
-            qntd
-        });
+    //function to insert a data in firebase
+    //new
+    function write(toInsert, manager){
+        let ref = manager.push();
+        ref.set(toInsert);
     }
-
-    //function to create a new information
-    function writeImageThemeData(id, theme, group, path, url, manager) {
-        // Generate a reference to a new location and add some data using push()
-        let imageThemesRef = manager.push();
-        imageThemesRef.set({
-            id,
-            theme,
-            group,
-            path,
-            url
-        });
-    }
-
-    //function to create a new information
-    function writeConfigurationGameData(id, name, configurationTag, qntd,manager) {
-        // Generate a reference to a new location and add some data using push()
-        let configurationRef = manager.push();
-        configurationRef.set({
-            id,
-            name,
-            qntd,
-            configurationTag
-        });
-    }
-
 
     //function to look the cel of a specific
     async function find (manager, value, attribute){
@@ -52,8 +19,6 @@ module.exports = app => {
         await manager.orderByValue().once("value", tags => {
             tags.forEach( data => {
                 if(data.val()[attribute] == value){
-                    let json = {...data.val()}
-                    //console.log(json) 
                     find.push({...data.val(),key: data.key});
                 }
             });
@@ -71,5 +36,5 @@ module.exports = app => {
         return list
     }
 
-    return {writeTagData, writeThemeData, writeImageThemeData, writeConfigurationGameData, find, data}
+    return {find, data , write, getReferenceFirebase}
 }

@@ -1,49 +1,22 @@
 module.exports = app => {
 
-    const {writeThemeData,find, data} = app.api.methods;
+
+    const {write,find, data} = app.api.methods;
     const {existsOrError} = app.api.validation;
-    const {getImagesTheme} = app.api.Image;
 
     //references of themes in the firebase
-    var manager = app.db.ref('themes');
-
+    var manager = app.db.ref('categories');
 
     const get = async (req,res) => {
         let HATEOAS = [
             {
-                href:"https://rest-api-trimemoria.herokuapp.com/theme",
+                href:"https://rest-api-trimemoria.herokuapp.com/categories",
                 method: "POST",
-                rel: "post_theme"
+                rel: "post_categories"
             }
         ]
-        let themes = await data(manager)
-        res.json({data: themes,_links: HATEOAS});
-    }
-
-    const getImages = async (req,res) => {
-        let theme = req.params.theme
-        let HATEOAS = [
-            {
-                href:"https://rest-api-trimemoria.herokuapp.com/theme",
-                method: "GET",
-                rel: "get_theme"
-            }
-        ]
-        try{
-            let answer = await getImagesTheme(theme);
-            existsOrError("Não existe imagens armazenadas neste tema, com esse nome",answer);
-            let images = answer.map(data => {
-                let cel = {
-                    href: data.url,
-                    group: data.group
-                };
-                return cel;
-            });
-            res.json({data: images,_links: HATEOAS});
-        }catch(message){
-            res.statusCode = 404;
-            res.json({error: message});
-        }
+        let categories = await data(manager)
+        res.json({data: categories,_links: HATEOAS});
     }
 
     const getById = async (req,res) => {
@@ -51,17 +24,17 @@ module.exports = app => {
         if(!isNaN(id)){
             try{
                 let answer = await find(manager,id,'id');
-                existsOrError("Não foi encontrado o tema",answer);
+                existsOrError("Não foi encontrado a categoria",answer);
                 let HATEOAS = [
                     {
-                        href:"https://rest-api-trimemoria.herokuapp.com/theme/" + answer[0].key,
+                        href:"https://rest-api-trimemoria.herokuapp.com/categories/" + answer[0].key,
                         method: "DELETE",
-                        rel: "delete_theme"
+                        rel: "delete_categories"
                     },
                     {
-                        href:"https://rest-api-trimemoria.herokuapp.com/theme/"  + answer[0].key,
+                        href:"https://rest-api-trimemoria.herokuapp.com/categories/"  + answer[0].key,
                         method: "PUT",
-                        rel: "put_theme"
+                        rel: "put_categories"
                     }
                 ]
                 res.json({data: answer[0], _links: HATEOAS});
@@ -75,26 +48,27 @@ module.exports = app => {
     const destroy = (req,res) => {
         let HATEOAS = [
             {
-                href:"https://rest-api-trimemoria.herokuapp.com/theme",
+                href:"https://rest-api-trimemoria.herokuapp.com/categories",
                 method: "GET",
-                rel: "get_theme"
+                rel: "get_categories"
             }
         ]
         let key = req.params.key;
-        app.db.ref("themes/" + key).remove().then(() =>  res.json({data: "Excluido com sucesso", _links: HATEOAS}))
-                                            .catch(error => res.status(404).send({error}));
+        app.db.ref("categories/" + key).remove()
+                                       .then(() =>  res.json({data: "Excluido com sucesso", _links: HATEOAS}))
+                                       .catch(error => res.status(404).send({error}));
     }
 
     const save = async (req,res) => {
-        let {name,qntd,id} = req.body;
+        let {name,attributes} = req.body;
         try{
             existsOrError("O campo nome deve ser preenchido",name);
-            existsOrError("O campo quantidade deve ser preenchido",qntd);
+            existsOrError("O campo atributos deve ser preenchido",attributes);
             let HATEOAS = [
                 {
-                    href:"https://rest-api-trimemoria.herokuapp.com/theme",
+                    href:"https://rest-api-trimemoria.herokuapp.com/categories",
                     method: "GET",
-                    rel: "get_theme"
+                    rel: "get_categories"
                 }
             ]
             let exists = await find(manager,name,'name');
@@ -103,10 +77,10 @@ module.exports = app => {
                 if(name != answer[0].name && exists.length > 0){
                     res.status(404).send({error: "Já existe um cadastro com esse nome",_links:HATEOAS});
                 }else{
-                    app.db.ref("themes/" + req.params.key).set({
+                    app.db.ref("categories/" + req.params.key).set({
                         id, 
                         name, 
-                        qntd
+                        attributes
                     });
                     res.statusCode = 200;
                     res.send({data: "Updated",_links: HATEOAS});
@@ -116,7 +90,8 @@ module.exports = app => {
                     res.status(404).send({error: "Já existe um cadastro com esse nome",_links:HATEOAS});
                 }else{
                     let randomNumber = Math.floor(Math.random() * 65536);
-                    writeThemeData(randomNumber, name, qntd, manager);
+                    let info = {id: randomNumber, ...req.body}
+                    write(info,manager);
                     res.statusCode = 200;
                     res.send({data: "Inserted",_links: HATEOAS});
                 }
@@ -127,5 +102,6 @@ module.exports = app => {
         }
     }
 
-    return {get, getById, destroy, save, getImages};
+    return {get,getById,destroy,save};
+
 }

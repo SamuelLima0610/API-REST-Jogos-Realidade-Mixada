@@ -1,16 +1,17 @@
 module.exports = (app,io) => {
-    const {writeTagData,data} = app.api.methods;
 
-    var manager = app.db.ref('tags'); //references of tags in the firebase
+    const {write,data} = app.api.methods;
+
+    var manager = app.db.ref('data'); //references of tags in the firebase
     
     const get = async (req,res) => {
-        let tags = await data(manager)
-        res.json(tags);    
+        let info = await data(manager)
+        res.json(info);    
     }
 
     const destroy = (req,res) => {
         let key = req.params.key;
-        app.db.ref("tags/" + key).remove();
+        app.db.ref("data/" + key).remove();
         res.sendStatus(200); 
     }
     
@@ -35,10 +36,11 @@ module.exports = (app,io) => {
     }
 
     const save = (req,res) => {
-        let tag = req.body.tag;
-        io.emit("tag",{tag})
+        let {detectedData,type} = req.body;
+        io.emit(type,{detectedData});
         let randomNumber = Math.floor(Math.random() * 65536);
-        writeTagData(randomNumber, tag, manager);
+        let info = {id: randomNumber, data: detectedData};
+        write(info,manager);
         res.statusCode = 200;
         res.send({res: "Inserted"});    
     }
