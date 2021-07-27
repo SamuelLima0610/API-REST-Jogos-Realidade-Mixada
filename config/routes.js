@@ -1,15 +1,15 @@
 module.exports = app => {
 
     //generics (All the configuration will be managed by this routes)
-    app.get('/config/:category', app.api.auth.secondAuth, app.api.generic.get);
+    app.get('/config/:category', app.api.auth.admAuth, app.api.generic.get);
     app.get('/config/:category/:id', app.api.auth.secondAuth, app.api.generic.getById);
-    app.post('/config/:category', app.api.auth.secondAuth, app.api.generic.save);
+    app.post('/config/:category', app.api.auth.firstAuth, app.api.generic.save);
     app.put('/config/:category/:key',app.api.auth.secondAuth,app.api.generic.save);
     app.delete('/config/:category/:key',app.api.auth.secondAuth,app.api.generic.destroy);
 
     //categories(Manager the categories of the configuration)
     app.get('/category', app.api.auth.firstAuth,app.api.category.get);
-    app.get('/category/:id', app.api.auth.firstAuth, app.api.category.getById);
+    app.get('/category/:search', app.api.auth.firstAuth, app.api.category.getByIdOrName);
     app.post('/category', app.api.auth.firstAuth, app.api.category.save);
     app.delete('/category/:key',app.api.auth.firstAuth,app.api.category.destroy);
 

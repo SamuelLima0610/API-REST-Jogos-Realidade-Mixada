@@ -19,11 +19,11 @@ module.exports = app => {
         res.json({data: categories,_links: HATEOAS});
     }
 
-    const getById = async (req,res) => {
-        let id = req.params.id;
-        if(!isNaN(id)){
+    const getByIdOrName = async (req,res) => {
+        let search = req.params.search;
+        if(!isNaN(search)){
             try{
-                let answer = await find(manager,id,'id');
+                let answer = await find(manager,search,'id');
                 existsOrError("Não foi encontrado a categoria",answer);
                 let HATEOAS = [
                     {
@@ -42,8 +42,21 @@ module.exports = app => {
                 res.statusCode = 404;
                 res.json({error: message});
             }
+        }else{
+            let answer = await find(manager,search,'user');
+            existsOrError("Não foi encontrado nenhuma categoria cadastrada pelo usuário",answer);
+            let HATEOAS = [
+                    {
+                        href:"https://rest-api-trimemoria.herokuapp.com/categories/",
+                        method: "POST",
+                        rel: "post_categories"
+                    }
+            ]
+            res.json({data: answer, _links: HATEOAS});    
         }
     }
+
+
 
     const destroy = (req,res) => {
         let HATEOAS = [
@@ -60,7 +73,7 @@ module.exports = app => {
     }
 
     const save = async (req,res) => {
-        let {name,attributes} = req.body;
+        let {name,attributes,user} = req.body;
         try{
             existsOrError("O campo nome deve ser preenchido",name);
             existsOrError("O campo atributos deve ser preenchido",attributes);
@@ -102,6 +115,6 @@ module.exports = app => {
         }
     }
 
-    return {get,getById,destroy,save};
+    return {get,getByIdOrName,destroy,save};
 
 }
