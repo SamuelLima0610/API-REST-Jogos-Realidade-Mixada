@@ -20,6 +20,7 @@ module.exports = app => {
     }
 
     const getByIdOrName = async (req,res) => {
+        console.log("teste")
         let search = req.params.search;
         if(!isNaN(search)){
             try{
@@ -27,12 +28,12 @@ module.exports = app => {
                 existsOrError("Não foi encontrado a categoria",answer);
                 let HATEOAS = [
                     {
-                        href:"https://rest-api-trimemoria.herokuapp.com/categories/" + answer[0].key,
+                        href:"https://rest-api-trimemoria.herokuapp.com/categories/" + answer[0].name + '/' + answer[0].key,
                         method: "DELETE",
                         rel: "delete_categories"
                     },
                     {
-                        href:"https://rest-api-trimemoria.herokuapp.com/categories/"  + answer[0].key,
+                        href:"https://rest-api-trimemoria.herokuapp.com/categories/" + answer[0].name + '/' + answer[0].key,
                         method: "PUT",
                         rel: "put_categories"
                     }
@@ -43,16 +44,21 @@ module.exports = app => {
                 res.json({error: message});
             }
         }else{
-            let answer = await find(manager,search,'user');
-            existsOrError("Não foi encontrado nenhuma categoria cadastrada pelo usuário",answer);
-            let HATEOAS = [
+            try{
+                let answer = await find(manager,search,'user');
+                existsOrError("Não foi encontrado nenhuma categoria cadastrada pelo usuário",answer);
+                let HATEOAS = [
                     {
                         href:"https://rest-api-trimemoria.herokuapp.com/categories/",
                         method: "POST",
                         rel: "post_categories"
                     }
-            ]
-            res.json({data: answer, _links: HATEOAS});    
+                ]
+                res.json({data: answer, _links: HATEOAS});
+            }catch(message){
+                res.statusCode = 404;
+                res.json({error: message});
+            } 
         }
     }
 
@@ -73,7 +79,7 @@ module.exports = app => {
     }
 
     const save = async (req,res) => {
-        let {name,attributes,user} = req.body;
+        let {name,attributes,user,id} = req.body;
         try{
             existsOrError("O campo nome deve ser preenchido",name);
             existsOrError("O campo atributos deve ser preenchido",attributes);

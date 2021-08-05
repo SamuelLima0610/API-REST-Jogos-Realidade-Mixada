@@ -11,7 +11,8 @@ module.exports = app => {
     app.get('/category', app.api.auth.firstAuth,app.api.category.get);
     app.get('/category/:search', app.api.auth.firstAuth, app.api.category.getByIdOrName);
     app.post('/category', app.api.auth.firstAuth, app.api.category.save);
-    app.delete('/category/:key',app.api.auth.firstAuth,app.api.category.destroy);
+    app.put('/category/:category/:key', app.api.auth.secondAuth, app.api.category.save);
+    app.delete('/category/:category/:key',app.api.auth.secondAuth,app.api.category.destroy);
 
     //Data(Manager the data will be pass by socket.io)
     app.get('/data', app.api.detectedData.get);
