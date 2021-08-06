@@ -99,7 +99,8 @@ module.exports = app => {
                     app.db.ref("categories/" + req.params.key).set({
                         id, 
                         name, 
-                        attributes
+                        attributes,
+                        user
                     });
                     res.statusCode = 200;
                     res.send({data: "Updated",_links: HATEOAS});
