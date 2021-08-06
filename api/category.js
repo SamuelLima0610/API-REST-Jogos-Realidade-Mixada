@@ -10,7 +10,7 @@ module.exports = app => {
     const get = async (req,res) => {
         let HATEOAS = [
             {
-                href:"https://rest-api-trimemoria.herokuapp.com/categories",
+                href:"https://rest-api-trimemoria.herokuapp.com/category",
                 method: "POST",
                 rel: "post_categories"
             }
@@ -28,12 +28,12 @@ module.exports = app => {
                 existsOrError("Não foi encontrado a categoria",answer);
                 let HATEOAS = [
                     {
-                        href:"https://rest-api-trimemoria.herokuapp.com/categories/" + answer[0].name + '/' + answer[0].key,
+                        href:"https://rest-api-trimemoria.herokuapp.com/category/" + answer[0].name + '/' + answer[0].key,
                         method: "DELETE",
                         rel: "delete_categories"
                     },
                     {
-                        href:"https://rest-api-trimemoria.herokuapp.com/categories/" + answer[0].name + '/' + answer[0].key,
+                        href:"https://rest-api-trimemoria.herokuapp.com/category/" + answer[0].name + '/' + answer[0].key,
                         method: "PUT",
                         rel: "put_categories"
                     }
@@ -49,7 +49,7 @@ module.exports = app => {
                 existsOrError("Não foi encontrado nenhuma categoria cadastrada pelo usuário",answer);
                 let HATEOAS = [
                     {
-                        href:"https://rest-api-trimemoria.herokuapp.com/categories/",
+                        href:"https://rest-api-trimemoria.herokuapp.com/category/",
                         method: "POST",
                         rel: "post_categories"
                     }
@@ -67,7 +67,7 @@ module.exports = app => {
     const destroy = (req,res) => {
         let HATEOAS = [
             {
-                href:"https://rest-api-trimemoria.herokuapp.com/categories",
+                href:"https://rest-api-trimemoria.herokuapp.com/category",
                 method: "GET",
                 rel: "get_categories"
             }
@@ -85,7 +85,7 @@ module.exports = app => {
             existsOrError("O campo atributos deve ser preenchido",attributes);
             let HATEOAS = [
                 {
-                    href:"https://rest-api-trimemoria.herokuapp.com/categories",
+                    href:"https://rest-api-trimemoria.herokuapp.com/category",
                     method: "GET",
                     rel: "get_categories"
                 }
