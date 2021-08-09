@@ -116,7 +116,7 @@ module.exports = app => {
                     let info = {id: randomNumber, adm: 0,key, ...req.body}
                     write(info,manager);
                     res.statusCode = 200;
-                    res.send({data: "Inserted",_links: HATEOAS});
+                    res.send({data: "Inserted",_links: HATEOAS , user: {id, key} });
                 }
             }
         }catch(message){
