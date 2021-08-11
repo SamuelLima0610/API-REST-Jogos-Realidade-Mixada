@@ -113,7 +113,8 @@ module.exports = app => {
                         length: 12,
                         charset: 'alphabetic'
                     });
-                    let info = {id: randomNumber, adm: 0,key, ...req.body}
+                    let id = randomNumber;
+                    let info = {id, adm: 0,key, ...req.body}
                     write(info,manager);
                     res.statusCode = 200;
                     res.send({data: "Inserted",_links: HATEOAS , user: {id, key} });
