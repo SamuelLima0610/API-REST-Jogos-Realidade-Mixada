@@ -6,8 +6,3 @@ Projeto desenvolvido para a matéria de Trabalho de conclusão de curso. É uma 
 
 - ``Node``
 - ``Express``
-- ``Firebase``
-- ``socket.io``
-
-## 📁 Acesso ao projeto
-Você pode acessar os arquivos do projeto clicando [aqui](https://github.com/SamuelLima0610/API-REST-Jogo-Trimemoria).
